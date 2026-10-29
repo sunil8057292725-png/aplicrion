@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApnaLocal - Local Services</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f8f7;color:#18312c}
+header{background:#087f5b;color:white;padding:22px 6%;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:27px;font-weight:bold}
+header a{color:white;text-decoration:none}
+.hero{text-align:center;padding:55px 15px;background:#d9f5e7}
+.hero h1{font-size:36px;margin:0 0 12px}
+.hero p{font-size:17px}
+.search{display:flex;gap:8px;max-width:650px;margin:25px auto 0}
+input,select{padding:13px;border:1px solid #ccd8d2;border-radius:8px;font-size:15px;min-width:0}
+.search input{flex:1}
+button{background:#087f5b;color:white;border:0;padding:13px 18px;border-radius:8px;cursor:pointer;font-size:15px}
+button:hover{background:#065f46}
+.container{max-width:1100px;margin:35px auto;padding:0 16px}
+.categories{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+.categories button{background:white;color:#087f5b;border:1px solid #b8d8c9}
+.categories button.active{background:#087f5b;color:white}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.card{background:white;padding:22px;border-radius:14px;border:1px solid #e1eae5;box-shadow:0 4px 12px #163b2510}
+.card .emoji{font-size:38px}
+.card h3{margin:12px 0 7px}
+.tag{color:#087f5b;font-size:13px;font-weight:bold}
+.card p{line-height:1.6;color:#52645d}
+.card a{display:inline-block;margin-top:8px;background:#087f5b;color:white;padding:10px 13px;border-radius:7px;text-decoration:none}
+.add{background:#e1f4e9;padding:30px;border-radius:14px;margin-top:35px}
+.add form{display:grid;gap:12px;max-width:500px}
+.add input,.add select{width:100%;background:white}
+footer{text-align:center;background:#18312c;color:white;padding:25px;margin-top:40px}
+#result{margin:15px 0}
+@media(max-width:550px){
+.hero h1{font-size:28px}
+.search{flex-direction:column}
+header{padding:18px}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">📍 ApnaLocal</div>
+  <a href="#add">+ अपनी दुकान जोड़ें</a>
+</header>
+
+<section class="hero">
+  <h1>अपने शहर की सर्विस खोजें</h1>
+  <p>मोबाइल रिपेयर से लेकर Wi-Fi टेक्नीशियन तक, सब एक जगह।</p>
+
+  <div class="search">
+    <input id="q" placeholder="सर्विस या दुकान खोजें...">
+    <button onclick="filterCards()">खोजें</button>
+  </div>
+</section>
+
+<main class="container">
+  <h2>सर्विस चुनें</h2>
+
+  <div class="categories">
+    <button class="active" onclick="choose('सभी',this)">सभी</button>
+    <button onclick="choose('मोबाइल रिपेयर',this)">📱 मोबाइल</button>
+    <button onclick="choose('Wi-Fi और राउटर',this)">📶 Wi-Fi</button>
+    <button onclick="choose('इलेक्ट्रिशियन',this)">💡 इलेक्ट्रिशियन</button>
+    <button onclick="choose('कंप्यूटर रिपेयर',this)">💻 कंप्यूटर</button>
+  </div>
+
+  <p id="result">सर्विस की लिस्ट</p>
+  <div class="cards" id="cards"></div>
+
+  <section class="add" id="add">
+    <h2>अपनी दुकान लिस्ट करें</h2>
+    <p>अपनी जानकारी भरें। WhatsApp पर लिस्टिंग की रिक्वेस्ट भेजें।</p>
+
+    <form id="listingForm">
+      <input id="shop" placeholder="दुकान / सर्विस का नाम" required>
+      <select id="category" required>
+        <option value="">कैटेगरी चुनें</option>
+        <option>मोबाइल रिपेयर</option>
+        <option>Wi-Fi और राउटर</option>
+        <option>इलेक्ट्रिशियन</option>
+        <option>कंप्यूटर रिपेयर</option>
+      </select>
+      <input id="area" placeholder="शहर या इलाका" required>
+      <input id="phone" placeholder="आपका WhatsApp नंबर" required>
+      <button type="submit">लिस्टिंग की रिक्वेस्ट भेजें</button>
+    </form>
+    <p id="notice"></p>
+  </section>
+</main>
+
+<footer>
+  <h3>ApnaLocal</h3>
+  <p>अपने शहर की सर्विस, आसानी से खोजें।</p>
+  <p>© 2026 ApnaLocal</p>
+</footer>
+
+<script>
+// अपना WhatsApp नंबर देश के कोड सहित डालें,
+// उदाहरण: भारत के लिए 91XXXXXXXXXX
+const ADMIN_WHATSAPP = "91XXXXXXXXXX";
+
+const services = [
+ {name:"Sharma Mobile Repair",cat:"मोबाइल रिपेयर",area:"अपने इलाके में",emoji:"📱",desc:"मोबाइल रिपेयर और स्क्रीन संबंधी सर्विस"},
+ {name:"Local Wi-Fi Technician",cat:"Wi-Fi और राउटर",area:"अपने इलाके में",emoji:"📶",desc:"राउटर सेटअप और Wi-Fi समस्या की सर्विस"},
+ {name:"Local Electrician",cat:"इलेक्ट्रिशियन",area:"अपने इलाके में",emoji:"💡",desc:"घर की बिजली संबंधी सर्विस"},
+ {name:"Computer Repair Service",cat:"कंप्यूटर रिपेयर",area:"अपने इलाके में",emoji:"💻",desc:"कंप्यूटर और लैपटॉप की सर्विस"}
+];
+
+let selected = "सभी";
+
+function render(list){
+ const cards = document.getElementById("cards");
+ cards.innerHTML = "";
+
+ document.getElementById("result").textContent =
+   "कुल " + list.length + " सर्विस";
+
+ if(list.length === 0){
+   cards.innerHTML = "<p>कोई सर्विस नहीं मिली। दूसरा शब्द खोजें।</p>";
+   return;
+ }
+
+ list.forEach(s => {
+   const el = document.createElement("article");
+   el.className = "card";
+
+   const emoji = document.createElement("div");
+   emoji.className = "emoji";
+   emoji.textContent = s.emoji;
+
+   const h = document.createElement("h3");
+   h.textContent = s.name;
+
+   const tag = document.createElement("div");
+   tag.className = "tag";
+   tag.textContent = s.cat;
+
+   const p = document.createElement("p");
+   p.textContent = s.desc + " | " + s.area;
+
+   const a = document.createElement("a");
+   a.href = "https://wa.me/" + ADMIN_WHATSAPP +
+     "?text=" + encodeURIComponent("Mujhe " + s.name + " ke baare mein jaankari chahiye.");
+   a.target = "_blank";
+   a.rel = "noopener";
+   a.textContent = "WhatsApp पर पूछें";
+
+   el.append(emoji,h,tag,p,a);
+   cards.appendChild(el);
+ });
+}
+
+function filterCards(){
+ const q = document.getElementById("q").value.toLowerCase().trim();
+ render(services.filter(s =>
+   (selected === "सभी" || s.cat === selected) &&
+   (s.name + " " + s.cat + " " + s.area + " " + s.desc)
+     .toLowerCase().includes(q)
+ ));
+}
+
+function choose(cat,btn){
+ selected = cat;
+ document.querySelectorAll(".categories button")
+   .forEach(b => b.classList.remove("active"));
+ btn.classList.add("active");
+ filterCards();
+}
+
+document.getElementById("q").addEventListener("input",filterCards);
+
+document.getElementById("listingForm").addEventListener("submit",function(e){
+ e.preventDefault();
+
+ const shop = document.getElementById("shop").value.trim();
+ const cat = document.getElementById("category").value;
+ const area = document.getElementById("area").value.trim();
+ const phone = document.getElementById("phone").value.trim();
+
+ const message =
+   "ApnaLocal par nayi listing ki request:\n" +
+   "Dukaan: " + shop + "\n" +
+   "Category: " + cat + "\n" +
+   "Area: " + area + "\n" +
+   "Contact: " + phone;
+
+ if(ADMIN_WHATSAPP === "91XXXXXXXXXX"){
+   document.getElementById("notice").textContent =
+     "Pehle code mein ADMIN_WHATSAPP ki jagah apna WhatsApp number daalein.";
+   return;
+ }
+
+ document.getElementById("notice").textContent =
+   "WhatsApp khul raha hai. Request bhejne ke liye Send dabayein.";
+
+ window.open(
+   "https://wa.me/" + ADMIN_WHATSAPP +
+   "?text=" + encodeURIComponent(message),
+   "_blank"
+ );
+});
+
+render(services);
+</script>
+</body>
+</html>
